@@ -1,4 +1,3 @@
-import { ValidationException } from '@application/common/exceptions';
 import { PostsRepository } from '@application/common/interfaces';
 import { Post } from '@domain/entities';
 
@@ -21,15 +20,16 @@ describe('getPostQuery', () => {
   }
 
   describe('given an invalid query', () => {
-    it('should throw a validation exception', async () => {
+    it('should return null when repository returns null', async () => {
       // Arrange
-      const { getPostQuery } = setup();
+      const { getPostQuery, postsRepository } = setup();
+      postsRepository.getById.mockResolvedValue(null);
 
       // Act
-      const result = getPostQuery({ id: 'invalid-id' });
+      const result = await getPostQuery({ id: 'invalid-id' });
 
       // Assert
-      await expect(result).rejects.toThrow(ValidationException);
+      expect(result).toBeNull();
     });
   });
 

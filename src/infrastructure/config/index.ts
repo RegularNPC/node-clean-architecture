@@ -1,24 +1,25 @@
 import { ApplicationConfig } from '@application/common/interfaces';
-import { z } from 'zod';
 
 export function makeConfig(): ApplicationConfig {
-  const schema = z.object({
-    DATABASE_URL: z.string(),
-    NODE_ENV: z.union([z.literal('development'), z.literal('production'), z.literal('test')]),
-    LOG_LEVEL: z.union([z.literal('debug'), z.literal('info'), z.literal('warn'), z.literal('error')]),
-    PORT: z
-      .string()
-      .transform((val) => parseInt(val, 10))
-      .refine((val) => val >= 1 && val <= 65535, {
-        message: 'Port must be between 1 and 65535',
-      }),
-  });
+  const env = process.env.NODE_ENV;
+  const logLevel = process.env.LOG_LEVEL;
+  const port = Number(process.env.PORT);
 
-  const parsedEnv = schema.parse(process.env);
+  if (!env || !['development', 'production', 'test'].includes(env)) {
+    throw new Error('Invalid NODE_ENV');
+  }
+
+  if (!logLevel || !['debug', 'info', 'warn', 'error'].includes(logLevel)) {
+    throw new Error('Invalid LOG_LEVEL');
+  }
+
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error('Invalid PORT');
+  }
 
   return {
-    env: parsedEnv.NODE_ENV,
-    logLevel: parsedEnv.LOG_LEVEL,
-    port: parsedEnv.PORT,
+    env,
+    logLevel,
+    port,
   };
 }
