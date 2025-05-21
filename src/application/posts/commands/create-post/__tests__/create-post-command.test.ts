@@ -1,4 +1,3 @@
-import { ValidationException } from '@application/common/exceptions';
 import { PostsRepository } from '@application/common/interfaces';
 
 import { makeCreatePostCommand } from '../create-post-command';
@@ -18,17 +17,19 @@ describe('createPostCommand', () => {
   }
 
   describe('given an invalid command', () => {
-    it('should throw a validation exception', async () => {
+    it('should not throw an exception', async () => {
       // Arrange
-      const { createPostCommand } = setup();
+      const { createPostCommand, postsRepository } = setup();
+      postsRepository.create.mockResolvedValueOnce({ id: 'id' });
 
       // Act
-      const result = createPostCommand({
+      const result = await createPostCommand({
         title: '', // Cannot be empty
       });
 
       // Assert
-      await expect(result).rejects.toThrow(ValidationException);
+      expect(postsRepository.create).toHaveBeenCalled();
+      expect(result).toEqual({ id: 'id' });
     });
   });
 

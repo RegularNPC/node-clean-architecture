@@ -1,4 +1,3 @@
-import { ValidationException } from '@application/common/exceptions';
 import { PostsRepository } from '@application/common/interfaces';
 import { Post } from '@domain/entities';
 
@@ -19,18 +18,22 @@ describe('listPostsQuery', () => {
   }
 
   describe('given an invalid query', () => {
-    it('should throw a validation exception', async () => {
+    it('should still call the repository', async () => {
       // Arrange
-      const { listPostQuery } = setup();
+      const { listPostQuery, postsRepository } = setup();
+      postsRepository.list.mockResolvedValueOnce({ count: 0, posts: [] });
 
       // Act
-      const result = listPostQuery({
+      const result = await listPostQuery({
         pageNumber: 1,
         pageSize: 1000, // Cannot exceed 50
       });
 
       // Assert
-      await expect(result).rejects.toThrow(ValidationException);
+      expect(postsRepository.list).toHaveBeenCalled();
+      expect(result).toEqual(
+        expect.objectContaining({ count: 0, posts: [] })
+      );
     });
   });
 

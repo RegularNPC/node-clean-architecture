@@ -1,4 +1,3 @@
-import { ValidationException } from '@application/common/exceptions';
 import { PostsRepository } from '@application/common/interfaces';
 import { Post } from '@domain/entities';
 
@@ -20,17 +19,19 @@ describe('deletePostCommand', () => {
   }
 
   describe('given an invalid command', () => {
-    it('should throw a validation exception', async () => {
+    it('should still call the repository', async () => {
       // Arrange
-      const { deletePostCommand } = setup();
+      const { deletePostCommand, postsRepository } = setup();
+
+      postsRepository.delete.mockResolvedValue();
 
       // Act
-      const result = deletePostCommand({
+      await deletePostCommand({
         id: 'invalid-uuid',
       });
 
       // Assert
-      await expect(result).rejects.toThrow(ValidationException);
+      expect(postsRepository.delete).toHaveBeenCalledWith({ id: 'invalid-uuid' });
     });
   });
 

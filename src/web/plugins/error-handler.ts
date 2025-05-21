@@ -1,4 +1,3 @@
-import { ValidationException } from '@application/common/exceptions';
 import { FastifyError, FastifyErrorCodes, FastifyInstance } from 'fastify';
 import fp from 'fastify-plugin';
 
@@ -38,19 +37,6 @@ async function errorHandlerPlugin(fastify: FastifyInstance) {
     if (fastifyError) {
       const response = fastifyError(error);
       return res.status(response.status).send(response);
-    }
-
-    // Handle custom application errors
-    const applicationError: Error = error;
-
-    if (applicationError instanceof ValidationException) {
-      const { errors } = applicationError;
-
-      return res.status(400).send({
-        errors,
-        status: 400,
-        type: 'https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1',
-      } satisfies ExceptionResponse);
     }
 
     // Catch all other errors
